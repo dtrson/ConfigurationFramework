@@ -2,10 +2,10 @@ package com.duong.store;
 
 import java.util.Properties;
 
-import com.duong.annotation.PropertiesAnnotation;
+import com.duong.annotation.ConfigData;
 
 public class PropStore {
-	@PropertiesAnnotation(file = "app.properties",autoLoad=false)
+	@ConfigData(file = "app.properties",autoLoad=false, key = "source")
 	private static Properties appProps;
 	
 	public static Properties getAppProps() {

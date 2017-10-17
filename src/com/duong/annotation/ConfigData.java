@@ -7,7 +7,9 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PropertiesAnnotation {
+public @interface ConfigData {
 	String file();
 	boolean autoLoad() default false;
+	String key();
+	String defaultValue() default "default value";
 }

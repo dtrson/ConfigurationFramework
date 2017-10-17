@@ -10,34 +10,35 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import com.duong.annotation.PropertiesAnnotation;
+import com.duong.annotation.ConfigData;
 import com.duong.store.PropStore;
 
 public class PropsLoader {
-	private static final String SYSTEM_VAR = "APP_PROPS";
-	public static void load() throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+
+	public static void loadAnnotation() throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		Field[] fields = PropStore.class.getDeclaredFields();
 		for(Field field:fields){
-			if(field.isAnnotationPresent(PropertiesAnnotation.class)){
-				PropertiesAnnotation propsAnnotation = field.getAnnotation(PropertiesAnnotation.class);
-				loadPropertiesAndWatch(field.getName(),propsAnnotation);
+			if(field.isAnnotationPresent(ConfigData.class)){
+				ConfigData configData = field.getAnnotation(ConfigData.class);
+				loadPropertiesAndWatch(field.getName(),configData);
 			}
 			else{
 				System.out.println("None of configuration annotation found!!!");
 			}
 		}
 	}
-	private static void loadPropertiesAndWatch(String fieldName, PropertiesAnnotation propAnnotation) throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private static void loadPropertiesAndWatch(String fieldName, ConfigData configData) throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		// TODO Auto-generated method stub
-		String propsFile = System.getenv("APP_PROPS") + File.separator + propAnnotation.file();
+		String propsFile = configData.file();
+		String key = configData.key();
 		System.out.println(propsFile);
-		loadProperties(fieldName,propsFile);
-		if(propAnnotation.autoLoad()){
-			PropsWatcherTask.watch(fieldName,propsFile, propAnnotation);
+		loadProperties(configData, fieldName,propsFile, key);
+		if(configData.autoLoad()){
+			PropsWatcherTask.watch(fieldName,propsFile, configData);
 		}
 		
 	}
-	protected static void loadProperties(String fieldName, String propsFile) throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	protected static void loadProperties(ConfigData configData, String fieldName, String propsFile, String key) throws NoSuchMethodException, SecurityException, FileNotFoundException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		// TODO Auto-generated method stub
 		String setterName = "set" + Character.toUpperCase(fieldName.charAt(0))+fieldName.substring(1);
 		Method setter = PropStore.class.getDeclaredMethod(setterName, Properties.class);
@@ -45,11 +46,11 @@ public class PropsLoader {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try(InputStream resourceStream = loader.getResourceAsStream(propsFile)) {
 		    props.load(resourceStream);
+		    if(props.getProperty(key)==null || props.getProperty(key)==""){
+		    	props.setProperty(key, configData.defaultValue());
+		    }
 		    setter.invoke(null, props);
+		    
 		}
-		
-//		props.load(new FileInputStream(new File(propsFile)));
-		
-
 	}
 }

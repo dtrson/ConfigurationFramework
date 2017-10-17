@@ -1,7 +1,5 @@
 package com.duong.unitTest;
 
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +12,7 @@ public class LoadTest {
 	@Before
     public void load() {
         try {
-            PropsLoader.load();
+            PropsLoader.loadAnnotation();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -22,7 +20,7 @@ public class LoadTest {
 	
 	@Test
     public void testProperties() throws Exception{
-        Assert.assertEquals("son", PropStore.getAppProps().getProperty("vorname"));
+        Assert.assertEquals("default value", PropStore.getAppProps().getProperty("source"));
        
     }
 
